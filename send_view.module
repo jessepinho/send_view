@@ -1,0 +1,57 @@
+<?php
+
+/**
+ * @file
+ * Module file for the Send View module.
+ */
+
+function send_view($method, $destination, $view, $display, $args) {
+  $methods = send_view_get_methods();
+  $method = $methods[$method];
+  $method['callback']($destination, $view, $display, $args);
+}
+
+/**
+ * Implements hook_send_view_method_info().
+ */
+function send_view_send_view_method_info() {
+  return array(
+    'email' => array(
+      'label' => t('Email'),
+      'callback' => 'send_view_by_email',
+    ),
+  );
+}
+
+/**
+ * Get all send methods.
+ */
+function send_view_get_methods() {
+  return module_invoke_all('send_view_method_info');
+}
+
+/**
+ * Send a view by email.
+ */
+function send_view_by_email($destination, $view, $display, $args) {
+  drupal_mail('send_view', 'email', $destination, language_default(), array(
+    'view' => $view,
+    'display' => $display,
+    'args' => $args,
+  ));
+}
+
+/**
+ * Implements hook_mail().
+ */
+function send_view_mail($key, &$message, $params) {
+  if ($key == 'email') {
+    $view = views_get_view($params['view']);
+    $view->set_display($params['display']);
+    $view->set_arguments(explode('/', $params['args']));
+    // Thanks to https://drupal.org/node/1306564
+    $view->hide_admin_links = TRUE;
+    $message['subject'] = $view->get_title();
+    $message['body'] = $view->preview();
+  }
+}

@@ -1,0 +1,5 @@
+name = Send View
+description = Allows site admins to send a Views view using Rules.
+core = 7.x
+dependencies[] = rules
+dependencies[] = views

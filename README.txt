@@ -1,1 +1,0 @@
-There is no code in the master branch. Please use a versioned branch instead.
